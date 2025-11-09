@@ -70,11 +70,6 @@ h1 {
     color: #333;
 }
 
-/* Position Clear Chat History button */
-section[data-testid="stSidebar"] .stButton {
-    text-align: center;
-}
-
 /* Stick the chat input to the bottom of the screen */
 [data-baseweb="tab-panel"] {
     display: flex;

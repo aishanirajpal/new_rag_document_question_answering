@@ -63,9 +63,12 @@ def main():
         else:
             st.info("Upload documents to see them here.")
 
-        if st.button("Clear Chat History"):
-            st.session_state["messages"] = []
-            st.rerun()
+        # Use columns to center the button
+        _, col2, _ = st.columns([1, 2, 1])
+        with col2:
+            if st.button("Clear Chat History"):
+                st.session_state["messages"] = []
+                st.rerun()
 
     # Main Panel
     uploaded_files = st.file_uploader(
