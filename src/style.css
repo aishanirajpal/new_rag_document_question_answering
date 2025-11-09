@@ -84,11 +84,10 @@ section[data-testid="stSidebar"] .stButton {
 }
 
 section[data-testid="stSidebar"] .stButton button {
-    /* This centers the button and sets its width */
-    display: block;
+    /* This centers the button and allows it to size based on its content */
+    display: table;
     margin-left: auto;
     margin-right: auto;
-    width: 80%;
 }
 
 /* Stick the chat input to the bottom of the screen */
