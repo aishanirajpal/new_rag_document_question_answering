@@ -1,0 +1,14 @@
+cohere
+pinecone-client
+streamlit
+pypdf
+python-dotenv
+tenacity
+python-docx
+python-pptx
+sentence-transformers
+langchain
+faiss-cpu
+transformers
+langchain-community
+accelerate
