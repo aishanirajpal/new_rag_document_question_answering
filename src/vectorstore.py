@@ -48,16 +48,19 @@ class VectorStore:
 
     def extract_text_from_pdf(self, file_stream: io.BytesIO, file_name: str) -> dict:
         text = ""
-        with fitz.open(stream=file_stream, filetype="pdf") as pdf:
+        # The 'stream' argument requires the raw bytes for fitz
+        with fitz.open(stream=file_stream.getvalue(), filetype="pdf") as pdf:
             for page in pdf:
                 text += page.get_text()
         return {"text": text, "source": file_name}
 
     def extract_text_from_txt(self, file_stream: io.BytesIO, file_name: str) -> dict:
+        # .read() works directly on the BytesIO stream for text files
         text = file_stream.read().decode('utf-8')
         return {"text": text, "source": file_name}
 
     def extract_text_from_docx(self, file_stream: io.BytesIO, file_name: str) -> dict:
+        # The docx library can open the BytesIO stream directly
         document = docx.Document(file_stream)
         text = "\n".join([para.text for para in document.paragraphs])
         return {"text": text, "source": file_name}
