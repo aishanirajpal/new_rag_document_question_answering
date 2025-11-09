@@ -67,7 +67,8 @@ def main():
         st.markdown("""
             <style>
                 div[data-testid="stSidebar"] .stButton {
-                    text-align: center;
+                    display: flex;
+                    justify-content: center;
                 }
             </style>
         """, unsafe_allow_html=True)
