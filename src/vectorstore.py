@@ -35,32 +35,34 @@ class VectorStore:
 
     def load_documents(self):
         for doc_file in self.doc_files:
-            file_stream = io.BytesIO(doc_file.read())
+            # IMPORTANT: Reset the stream's cursor to the beginning before reading
+            doc_file.seek(0)
+            
             file_ext = os.path.splitext(doc_file.name)[1].lower()
             
-            # The text extraction function will handle reading the BytesIO stream directly
+            # Pass the file stream object directly to the appropriate extractor
             text_extractor = getattr(self, f"extract_text_from_{file_ext[1:]}", None)
             
             if text_extractor:
-                text = text_extractor(file_stream, doc_file.name)
+                text = text_extractor(doc_file, doc_file.name)
                 if text and text.get("text", "").strip(): # Ensure extracted text is not empty
                     self.doc_texts.append(text)
 
     def extract_text_from_pdf(self, file_stream: io.BytesIO, file_name: str) -> dict:
         text = ""
-        # The 'stream' argument requires the raw bytes for fitz
+        # fitz requires the raw bytes, so we use getvalue()
         with fitz.open(stream=file_stream.getvalue(), filetype="pdf") as pdf:
             for page in pdf:
                 text += page.get_text()
         return {"text": text, "source": file_name}
 
     def extract_text_from_txt(self, file_stream: io.BytesIO, file_name: str) -> dict:
-        # .read() works directly on the BytesIO stream for text files
+        # .read() works directly on the BytesIO stream
         text = file_stream.read().decode('utf-8')
         return {"text": text, "source": file_name}
 
     def extract_text_from_docx(self, file_stream: io.BytesIO, file_name: str) -> dict:
-        # The docx library can open the BytesIO stream directly
+        # python-docx can open the BytesIO stream directly
         document = docx.Document(file_stream)
         text = "\n".join([para.text for para in document.paragraphs])
         return {"text": text, "source": file_name}
