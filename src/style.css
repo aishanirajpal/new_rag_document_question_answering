@@ -1,0 +1,107 @@
+/* General App Styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f6;
+}
+
+/* Main container */
+.main .block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    padding-left: 5rem;
+    padding-right: 5rem;
+}
+
+/* Sidebar Styling */
+.css-1d391kg {
+    background-color: #ffffff;
+    border-right: 1px solid #e6e6e6;
+}
+
+h1 {
+    font-size: 2.5em;
+    color: #1e1e1e;
+    text-align: center;
+    padding-bottom: 1rem;
+}
+
+/* Tab Styling */
+.stTabs [data-baseweb="tab-list"] {
+	gap: 24px;
+}
+
+.stTabs [data-baseweb="tab"] {
+	height: 50px;
+    white-space: pre-wrap;
+	background-color: transparent;
+	border-radius: 4px;
+	color: #4b4b4b;
+	padding: 10px 20px;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+	background-color: #f0f2f6;
+}
+
+.stTabs [aria-selected="true"] {
+    background-color: #e6e6e6;
+    color: #1e1e1e;
+    font-weight: bold;
+}
+
+/* Chat Message Styling */
+[data-testid="stChatMessage"] {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Expander (Retrieved Documents) Styling */
+.stExpander {
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    background-color: #fafafa;
+}
+
+.stExpander header {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Position Clear Chat History button at the bottom of the sidebar */
+section[data-testid="stSidebar"] {
+    /* This makes the sidebar a flex container */
+    display: flex;
+    flex-direction: column;
+}
+
+section[data-testid="stSidebar"] .stButton {
+    /* This pushes the button's container to the bottom */
+    margin-top: auto;
+    margin-bottom: 2rem; /* Adds space from the absolute bottom */
+}
+
+section[data-testid="stSidebar"] .stButton button {
+    /* This centers the button and sets its width */
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+
+/* Stick the chat input to the bottom of the screen */
+[data-baseweb="tab-panel"] {
+    display: flex;
+    flex-direction: column;
+    /* Set a calculated height to fill the viewport minus headers/padding.
+       You may need to adjust the subtracted value (e.g., 220px) based on your screen. */
+    height: calc(100vh - 220px);
+}
+
+/* Make the chat history container grow and enable scrolling */
+[data-baseweb="tab-panel"] > div:nth-child(1) {
+    flex-grow: 1;
+    overflow-y: auto;
+}
