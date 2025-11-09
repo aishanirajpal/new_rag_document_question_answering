@@ -37,11 +37,14 @@ class VectorStore:
         for doc_file in self.doc_files:
             file_stream = io.BytesIO(doc_file.read())
             file_ext = os.path.splitext(doc_file.name)[1].lower()
+            
+            # The text extraction function will handle reading the BytesIO stream directly
             text_extractor = getattr(self, f"extract_text_from_{file_ext[1:]}", None)
             
             if text_extractor:
                 text = text_extractor(file_stream, doc_file.name)
-                self.doc_texts.append(text)
+                if text and text.get("text", "").strip(): # Ensure extracted text is not empty
+                    self.doc_texts.append(text)
 
     def extract_text_from_pdf(self, file_stream: io.BytesIO, file_name: str) -> dict:
         text = ""
