@@ -1,6 +1,7 @@
 cohere
 pinecone-client
 streamlit
+PyMuPDF
 pypdf
 python-dotenv
 tenacity
