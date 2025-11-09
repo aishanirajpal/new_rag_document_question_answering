@@ -35,16 +35,18 @@ class VectorStore:
 
     def load_documents(self):
         for doc_file in self.doc_files:
-            # IMPORTANT: Reset the stream's cursor to the beginning before reading
+            # First, rewind the file stream to the beginning.
             doc_file.seek(0)
-            
+            # Second, read the entire file content into a new BytesIO object.
+            # This creates a standardized, reliable in-memory file for all parsers.
+            file_stream = io.BytesIO(doc_file.read())
+
             file_ext = os.path.splitext(doc_file.name)[1].lower()
             
-            # Pass the file stream object directly to the appropriate extractor
             text_extractor = getattr(self, f"extract_text_from_{file_ext[1:]}", None)
             
             if text_extractor:
-                text = text_extractor(doc_file, doc_file.name)
+                text = text_extractor(file_stream, doc_file.name)
                 if text and text.get("text", "").strip(): # Ensure extracted text is not empty
                     self.doc_texts.append(text)
 
