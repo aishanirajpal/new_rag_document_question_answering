@@ -32,7 +32,11 @@ def get_chatbot(_vectorstore, cohere_api_key):
     return Chatbot(_vectorstore, cohere_api_key)
 
 def main():
-    st.set_page_config(layout="wide")
+    st.set_page_config(
+        page_title="RAG Q/A ChatBot",
+        page_icon="📄",
+        layout="wide"
+    )
     add_css("style.css")
 
     st.title("RAG Q/A ChatBot")
