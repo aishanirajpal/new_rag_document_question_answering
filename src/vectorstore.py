@@ -63,40 +63,51 @@ class VectorStore:
 
     def extract_text_from_txt(self, file_stream: io.BytesIO, file_name: str) -> dict:
         """Reads a text file, attempting to decode with utf-8 and falling back to latin-1."""
+        file_bytes = file_stream.getvalue()
         try:
-            text = file_stream.getvalue().decode('utf-8')
+            text = file_bytes.decode('utf-8')
         except UnicodeDecodeError:
             try:
-                text = file_stream.getvalue().decode('latin-1')
+                text = file_bytes.decode('latin-1')
             except Exception:
                 text = ""
         return {"text": text, "source": file_name}
 
     def extract_text_from_docx(self, file_stream: io.BytesIO, file_name: str) -> dict:
         """Extracts text from paragraphs and tables in a .docx file."""
-        document = docx.Document(file_stream)
-        text_parts = []
-        for para in document.paragraphs:
-            text_parts.append(para.text)
-        for table in document.tables:
-            for row in table.rows:
-                for cell in row.cells:
-                    text_parts.append(cell.text)
-        return {"text": "\n".join(text_parts), "source": file_name}
+        try:
+            stream_copy = io.BytesIO(file_stream.getvalue())
+            document = docx.Document(stream_copy)
+            text_parts = []
+            for para in document.paragraphs:
+                text_parts.append(para.text)
+            for table in document.tables:
+                for row in table.rows:
+                    for cell in row.cells:
+                        text_parts.append(cell.text)
+            return {"text": "\n".join(text_parts), "source": file_name}
+        except Exception as e:
+            print(f"Error extracting from {file_name}: {e}")
+            return {"text": "", "source": file_name}
 
     def extract_text_from_pptx(self, file_stream: io.BytesIO, file_name: str) -> dict:
         """Extracts text from text frames and tables in a .pptx file."""
-        presentation = Presentation(file_stream)
-        text_parts = []
-        for slide in presentation.slides:
-            for shape in slide.shapes:
-                if hasattr(shape, "text"):
-                    text_parts.append(shape.text)
-                if shape.has_table:
-                    for row in shape.table.rows:
-                        for cell in row.cells:
-                            text_parts.append(cell.text_frame.text)
-        return {"text": "\n".join(text_parts), "source": file_name}
+        try:
+            stream_copy = io.BytesIO(file_stream.getvalue())
+            presentation = Presentation(stream_copy)
+            text_parts = []
+            for slide in presentation.slides:
+                for shape in slide.shapes:
+                    if hasattr(shape, "text"):
+                        text_parts.append(shape.text)
+                    if shape.has_table:
+                        for row in shape.table.rows:
+                            for cell in row.cells:
+                                text_parts.append(cell.text_frame.text)
+            return {"text": "\n".join(text_parts), "source": file_name}
+        except Exception as e:
+            print(f"Error extracting from {file_name}: {e}")
+            return {"text": "", "source": file_name}
 
     def split_text(self, chunk_size=1000):
         for doc in self.doc_texts:

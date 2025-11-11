@@ -82,36 +82,22 @@ class Chatbot:
             return "Document not found.", []
 
         if self.use_hugging_face:
-            # Bypassing the pipeline's text processing to directly control tokenization.
-            # This is a definitive fix for the IndexError.
+            # 1. Tokenize the entire document text.
+            all_token_ids = self.summarizer.tokenizer.encode(document_text, truncation=False)
 
-            # 1. Tokenize the entire document text into token IDs.
-            all_token_ids = self.summarizer_tokenizer.encode(document_text, truncation=False)
-
-            # 2. Split the token IDs into chunks safely under the model's 1024 limit.
-            max_chunk_length = 1000
+            # 2. Split the token IDs into chunks safely under the model's limit.
+            # The tokenizer's model_max_length is often 1024. We'll use a slightly smaller chunk size.
+            max_chunk_length = self.summarizer.tokenizer.model_max_length - 2 # Leave room for special tokens
             chunks_of_ids = [all_token_ids[i:i + max_chunk_length] for i in range(0, len(all_token_ids), max_chunk_length)]
 
-            summaries = []
-            for chunk_of_ids in chunks_of_ids:
-                # 3. Create a tensor and move it to the same device as the model.
-                input_tensor = torch.tensor([chunk_of_ids]).to(self.summarizer.device)
-                
-                # 4. Generate summary by calling the model directly.
-                summary_ids = self.summarizer.model.generate(
-                    input_tensor, 
-                    max_length=150, 
-                    min_length=30, 
-                    num_beams=4,
-                    early_stopping=True
-                )
-                
-                # 5. Decode the output token IDs back to a string.
-                summary_text = self.summarizer_tokenizer.decode(summary_ids[0], skip_special_tokens=True)
-                summaries.append(summary_text)
+            # 3. Decode chunks back to text
+            text_chunks = [self.summarizer.tokenizer.decode(chunk_of_ids, skip_special_tokens=True) for chunk_of_ids in chunks_of_ids]
+
+            # 4. Summarize each chunk
+            summaries = self.summarizer(text_chunks, max_length=150, min_length=30, do_sample=False)
             
-            # 6. Join the summaries from all chunks.
-            full_summary = " ".join(summaries)
+            # 5. Join the summaries from all chunks.
+            full_summary = "\n".join([summary['summary_text'] for summary in summaries])
             return full_summary, []
         else:
             # Use a more direct prompt for summarization - return the stream directly
