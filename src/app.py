@@ -67,19 +67,12 @@ def main():
         else:
             st.info("Upload documents to see them here.")
 
-        # Use markdown to center the button
-        st.markdown("""
-            <style>
-                div[data-testid="stSidebar"] .stButton {
-                    display: flex;
-                    justify-content: center;
-                }
-            </style>
-        """, unsafe_allow_html=True)
-        
-        if st.button("Clear Chat History"):
-            st.session_state["messages"] = []
-            st.rerun()
+        # Use a container with columns to center the button
+        col1, col2, col3 = st.columns([1, 3, 1])
+        with col2:
+            if st.button("Clear Chat History", use_container_width=True):
+                st.session_state["messages"] = []
+                st.rerun()
 
     # Main Panel
     uploaded_files = st.file_uploader(
