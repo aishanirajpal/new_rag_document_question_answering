@@ -35,20 +35,23 @@ class VectorStore:
 
     def load_documents(self):
         for doc_file in self.doc_files:
-            # First, rewind the file stream to the beginning.
-            doc_file.seek(0)
-            # Second, read the entire file content into a new BytesIO object.
-            # This creates a standardized, reliable in-memory file for all parsers.
-            file_stream = io.BytesIO(doc_file.read())
+            try:
+                # First, rewind the file stream to the beginning.
+                doc_file.seek(0)
+                # Second, read the entire file content into a new BytesIO object.
+                # This creates a standardized, reliable in-memory file for all parsers.
+                file_stream = io.BytesIO(doc_file.read())
 
-            file_ext = os.path.splitext(doc_file.name)[1].lower()
-            
-            text_extractor = getattr(self, f"extract_text_from_{file_ext[1:]}", None)
-            
-            if text_extractor:
-                text = text_extractor(file_stream, doc_file.name)
-                if text and text.get("text", "").strip(): # Ensure extracted text is not empty
-                    self.doc_texts.append(text)
+                file_ext = os.path.splitext(doc_file.name)[1].lower()
+                
+                text_extractor = getattr(self, f"extract_text_from_{file_ext[1:]}", None)
+                
+                if text_extractor:
+                    text = text_extractor(file_stream, doc_file.name)
+                    if text and text.get("text", "").strip(): # Ensure extracted text is not empty
+                        self.doc_texts.append(text)
+            except Exception as e:
+                print(f"Error processing file {doc_file.name}: {e}")
 
     def extract_text_from_pdf(self, file_stream: io.BytesIO, file_name: str) -> dict:
         text = ""
@@ -61,14 +64,12 @@ class VectorStore:
     def extract_text_from_txt(self, file_stream: io.BytesIO, file_name: str) -> dict:
         """Reads a text file, attempting to decode with utf-8 and falling back to latin-1."""
         try:
-            text = file_stream.read().decode('utf-8')
+            text = file_stream.getvalue().decode('utf-8')
         except UnicodeDecodeError:
-            # Rewind the stream after a failed read and try another common encoding
-            file_stream.seek(0)
             try:
-                text = file_stream.read().decode('latin-1')
+                text = file_stream.getvalue().decode('latin-1')
             except Exception:
-                text = "" # Return empty string if all decoding attempts fail
+                text = ""
         return {"text": text, "source": file_name}
 
     def extract_text_from_docx(self, file_stream: io.BytesIO, file_name: str) -> dict:
@@ -89,8 +90,8 @@ class VectorStore:
         text_parts = []
         for slide in presentation.slides:
             for shape in slide.shapes:
-                if shape.has_text_frame:
-                    text_parts.append(shape.text_frame.text)
+                if hasattr(shape, "text"):
+                    text_parts.append(shape.text)
                 if shape.has_table:
                     for row in shape.table.rows:
                         for cell in row.cells:
